@@ -1,0 +1,268 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <iomanip>
+using namespace std;
+
+// ================= QUESTION CLASS =================
+
+class Question
+{
+private:
+    string questionText;
+    string optionA;
+    string optionB;
+    string optionC;
+    string optionD;
+    char correctAnswer;
+
+public:
+    // Constructor
+    Question(string q, string a, string b, string c, string d, char answer)
+    {
+        questionText = q;
+        optionA = a;
+        optionB = b;
+        optionC = c;
+        optionD = d;
+        correctAnswer = answer;
+    }
+
+    void displayQuestion()
+    {
+        cout << "\n" << questionText << endl;
+        cout << "A. " << optionA << endl;
+        cout << "B. " << optionB << endl;
+        cout << "C. " << optionC << endl;
+        cout << "D. " << optionD << endl;
+    }
+
+    bool checkAnswer(char answer)
+    {
+        return answer == correctAnswer;
+    }
+};
+
+// ================= PLAYER CLASS =================
+
+class Player
+{
+private:
+    string name;
+    int score;
+
+public:
+    // Constructor
+    Player(string playerName)
+    {
+        name = playerName;
+        score = 0;
+    }
+
+    void increaseScore()
+    {
+        score++;
+    }
+
+    string getName()
+    {
+        return name;
+    }
+
+    int getScore()
+    {
+        return score;
+    }
+};
+
+// ================= QUIZ CLASS =================
+
+class Quiz
+{
+protected:
+    vector<Question> questions;
+
+public:
+    void addQuestion(Question q)
+    {
+        questions.push_back(q);
+    }
+
+    virtual void startQuiz(Player &player)
+    {
+        char answer;
+
+        for (int i = 0; i < questions.size(); i++)
+        {
+            cout << "\n----------------------------------";
+            cout << "\nQuestion " << i + 1;
+            cout << "\n----------------------------------";
+
+            questions[i].displayQuestion();
+
+            cout << "\nEnter your answer (A/B/C/D): ";
+            cin >> answer;
+
+            answer = toupper(answer);
+
+            if (questions[i].checkAnswer(answer))
+            {
+                cout << "Correct Answer!\n";
+                player.increaseScore();
+            }
+            else
+            {
+                cout << "Wrong Answer!\n";
+            }
+        }
+    }
+};
+
+// ================= INHERITANCE =================
+
+class GeneralQuiz : public Quiz
+{
+public:
+    GeneralQuiz()
+    {
+        addQuestion(
+            Question(
+                "What is the capital of India?",
+                "Mumbai",
+                "New Delhi",
+                "Chennai",
+                "Hyderabad",
+                'B'));
+
+        addQuestion(
+            Question(
+                "Which language is mainly used for OOP?",
+                "HTML",
+                "CSS",
+                "C++",
+                "SQL",
+                'C'));
+
+        addQuestion(
+            Question(
+                "Which keyword is used to create a class in C++?",
+                "class",
+                "object",
+                "define",
+                "struct",
+                'A'));
+
+        addQuestion(
+            Question(
+                "Which concept hides data from outside access?",
+                "Inheritance",
+                "Encapsulation",
+                "Polymorphism",
+                "Compilation",
+                'B'));
+
+        addQuestion(
+            Question(
+                "Which symbol is used to end a C++ statement?",
+                ".",
+                ":",
+                ";",
+                ",",
+                'C'));
+    }
+};
+
+// ================= FILE HANDLING =================
+
+void saveScore(Player &player)
+{
+    ofstream file("scores.txt", ios::app);
+
+    if (file.is_open())
+    {
+        file << player.getName()
+             << " - "
+             << player.getScore()
+             << "/5"
+             << endl;
+
+        file.close();
+    }
+}
+
+// ================= MAIN FUNCTION =================
+
+int main()
+{
+    string playerName;
+    int choice;
+
+    cout << "========================================\n";
+    cout << "          QUIZ GAME SYSTEM\n";
+    cout << "========================================\n";
+
+    cout << "\nEnter Player Name: ";
+    getline(cin, playerName);
+
+    Player player(playerName);
+
+    cout << "\nWelcome, " << player.getName() << "!\n";
+
+    cout << "\n========== MAIN MENU ==========\n";
+    cout << "1. Start Quiz\n";
+    cout << "2. Exit\n";
+    cout << "Enter your choice: ";
+    cin >> choice;
+
+    if (choice == 1)
+    {
+        GeneralQuiz quiz;
+
+        cout << "\n========================================\n";
+        cout << "              QUIZ STARTED\n";
+        cout << "========================================\n";
+
+        quiz.startQuiz(player);
+
+        cout << "\n========================================\n";
+        cout << "              QUIZ RESULT\n";
+        cout << "========================================\n";
+
+        cout << "Player Name : " << player.getName() << endl;
+        cout << "Score       : " << player.getScore() << "/5" << endl;
+
+        double percentage =
+            (player.getScore() / 5.0) * 100;
+
+        cout << fixed << setprecision(2);
+        cout << "Percentage  : " << percentage << "%\n";
+
+        if (percentage >= 80)
+        {
+            cout << "Performance : Excellent!\n";
+        }
+        else if (percentage >= 60)
+        {
+            cout << "Performance : Good!\n";
+        }
+        else if (percentage >= 40)
+        {
+            cout << "Performance : Average\n";
+        }
+        else
+        {
+            cout << "Performance : Needs Improvement\n";
+        }
+
+        saveScore(player);
+
+        cout << "\nScore saved successfully!\n";
+    }
+    else
+    {
+        cout << "\nThank you for using Quiz Game System!\n";
+    }
+
+    return 0;
+}
